@@ -3,7 +3,8 @@
 // @name:en      IELTS Cat Mock → Official CBT Replica
 // @namespace    ieltscat.newcbt
 // @version      3.7.20
-// @description  100% 复刻官方新版雅思机考界面（参考 https://www.idpielts.cn/familiarisation-test 的 IDP Inspera 演示）：白底 Arial、56px 官方页头（IELTS 品牌 + Test taker ID + Show notes）、官方灰色 rubric 标题区、阅读/写作左右分栏 + 官方 2px 可拖拽分割条、72px 底部 Part 题号导航（21×27 蓝描边方块）、官方高亮（选中文字浮条 → 酒红高亮）、官方 Notes 侧边栏（#E8E8E8 300px）、写作分屏与 Words 计数、倒计时最后 5 分钟红色预警。彻底清除平台浅蓝/深蓝渐变背景。只作用于机考做题页（/mock/detail/*），练习页完全不受影响；做题、交卷、暂停等功能原样可用，右下角按钮随时开关。
+// @description  把新东方雅思猫机考做题页改造为接近新版雅思机考界面的观感。由于平台 DOM 结构和技术限制，无法做到像素级 100% 复刻，但在配色、排版、布局和交互逻辑上尽量贴近新版机考官方演示界面：白底 Arial、56px 页头（IELTS 品牌 + Test taker ID + 时间 + Show notes）、阅读/写作左右分栏 + 可拖拽分割条、底部 Part 题号导航、选中文字浮条（Note/Highlight/Clear all）、酒红色高亮、Notes 侧栏、倒计时最后 5 分钟红色预警。只作用于机考做题页（/mock/detail/*），练习页完全不受影响。
+// @description:en  Restyles IELTS Cat mock exam pages to resemble the new official IELTS on computer test interface. Due to DOM and technical constraints, pixel-perfect replication is not possible, but colors, layout, and interactions closely follow the official demo. Only affects /mock/detail/*; practice pages are untouched.
 // @author       JacobYixi
 // @license      Anti-996
 // @match        https://ieltscat.xdf.cn/*
