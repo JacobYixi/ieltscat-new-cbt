@@ -2,7 +2,7 @@
 // @name         新东方雅思猫机考 · 新版雅思机考界面
 // @name:en      XDF IELTS Cat Mock → New CBT Interface
 // @namespace    ieltscat.newcbt
-// @version      3.7.26
+// @version      3.7.27
 // @description  把新东方雅思猫机考做题页改造为接近新版雅思机考界面的观感。由于平台 DOM 结构和技术限制，无法做到像素级 100% 复刻，但在配色、排版、布局和交互逻辑上尽量贴近新版机考官方演示界面：白底 Arial、56px 页头（IELTS 品牌 + Test taker ID + 时间 + Show notes）、阅读/写作左右分栏 + 可拖拽分割条、底部 Part 题号导航、选中文字浮条（Note/Highlight/Clear all）、酒红色高亮、Notes 侧栏、倒计时最后 5 分钟红色预警。只作用于机考做题页（/mock/detail/*），练习页完全不受影响。
 // @description:en  Restyles IELTS Cat mock exam pages to resemble the new official IELTS on computer test interface. Due to DOM and technical constraints, pixel-perfect replication is not possible, but colors, layout, and interactions closely follow the official demo. Only affects /mock/detail/*; practice pages are untouched.
 // @author       JacobYixi
@@ -923,12 +923,23 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
       $$('.cbt-col-left').forEach(function (el) { el.classList.remove('cbt-col-left'); el.style.width = ''; });
       $$('.cbt-col-right').forEach(function (el) { el.classList.remove('cbt-col-right'); });
       $$('[data-cbt-split]').forEach(function (el) { el.removeAttribute('data-cbt-split'); });
+      /* 删除注入元素，但绝不删 toggle */
       $$('[data-cbt]').forEach(function (el) {
-        if (el.getAttribute('data-cbt') !== 'toggle') el.remove();
+        var k = el.getAttribute('data-cbt');
+        if (k && k !== 'toggle') el.remove();
       });
       document.body.classList.remove('cbt-new', 'cbt-notes-open', 'cbt-header-warn');
       document.documentElement.classList.remove('cbt-new');
     } catch (e) { console.warn('cbt revert error', e); }
+    /* 确保 toggle 按钮一定在 */
+    var t = $('[data-cbt="toggle"]');
+    if (!t) {
+      t = document.createElement('button');
+      t.setAttribute('data-cbt', 'toggle');
+      t.className = 'cbt-toggle';
+      t.addEventListener('click', function () { setEnabled(!state.enabled); });
+      document.body.appendChild(t);
+    }
   }
 
   function setEnabled(v) {
