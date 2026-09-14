@@ -2,7 +2,7 @@
 // @name         新东方雅思猫机考 · 新版雅思机考界面
 // @name:en      XDF IELTS Cat Mock → New CBT Interface
 // @namespace    ieltscat.newcbt
-// @version      3.8.2
+// @version      3.9.0
 // @description  把新东方雅思猫机考做题页改造为接近新版雅思机考界面的观感。由于平台 DOM 结构和技术限制，无法做到像素级 100% 复刻，但在配色、排版、布局和交互逻辑上尽量贴近新版机考官方演示界面：白底 Arial、56px 页头（IELTS 品牌 + Test taker ID + 时间 + Show notes）、阅读/写作左右分栏 + 可拖拽分割条、底部 Part 题号导航、选中文字浮条（Note/Highlight/Clear all）、酒红色高亮、Notes 侧栏、倒计时最后 5 分钟红色预警。只作用于机考做题页（/mock/detail/*），练习页完全不受影响。
 // @description:en  Restyles IELTS Cat mock exam pages to resemble the new official IELTS on computer test interface. Due to DOM and technical constraints, pixel-perfect replication is not possible, but colors, layout, and interactions closely follow the official demo. Only affects /mock/detail/*; practice pages are untouched.
 // @author       JacobYixi
@@ -418,70 +418,51 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
     /* 关键：浮条按钮 mousedown 阻止默认，防止点击时浏览器清空文本选区 */
     adder.addEventListener('mousedown', function (e) { e.preventDefault(); });
     adder.querySelector('[data-cbt-hl]').addEventListener('click', function () {
-      var range = savedRange;
-      if (!range) {
-        var sel = window.getSelection();
-        range = sel && !sel.isCollapsed ? sel.getRangeAt(0) : null;
-      }
-      var isClear = adder.querySelector('[data-cbt-hl] span').textContent === 'Clear';
-      if (range) {
-        var mark = closestMark(range.commonAncestorContainer);
-        if (isClear) {
-          /* Clear：清除选中区域的高亮 */
-          if (mark && mark.parentNode) {
-            var p0 = mark.parentNode;
-            while (mark.firstChild) p0.insertBefore(mark.firstChild, mark);
-            p0.removeChild(mark);
-          }
-        } else {
-          /* Highlight：已高亮则取消，否则新增 */
-          if (mark && mark.parentNode) {
-            var p1 = mark.parentNode;
-            while (mark.firstChild) p1.insertBefore(mark.firstChild, mark);
-            p1.removeChild(mark);
-          } else {
-            wrapRange(range, 'cbt-hl');
-          }
-        }
-      }
+      invokeOriginalMenu('Highlight');
       var sel2 = window.getSelection();
       sel2 && sel2.removeAllRanges();
       savedRange = null;
       hideAdder();
     });
     adder.querySelector('[data-cbt-clear-all]').addEventListener('click', function () {
-      $$('.cbt-hl').forEach(function (m) {
-        if (m.parentNode) {
-          var p = m.parentNode;
-          while (m.firstChild) p.insertBefore(m.firstChild, m);
-          p.removeChild(m);
-        }
-      });
+      invokeOriginalMenu('Clear all');
       var sel = window.getSelection();
       if (sel) sel.removeAllRanges();
       savedRange = null;
       hideAdder();
     });
     adder.querySelector('[data-cbt-note]').addEventListener('click', function () {
-      var range = savedRange;
+      invokeOriginalMenu('Notes');
       var sel = window.getSelection();
-      if (!range) {
-        range = sel && !sel.isCollapsed ? sel.getRangeAt(0) : null;
-      }
-      if (range) {
-        var txt = range.toString().trim();
-        if (txt) {
-          var id = noteIdFor(txt);
-          wrapRange(range, 'cbt-note', id);
-          saveNoteEntry(id, txt, '');
-        }
-      }
       if (sel) sel.removeAllRanges();
       savedRange = null;
       hideAdder();
-      if (txt) openNotesForNew(id);
     });
     bindHighlightMouse();
+  }
+
+  /* 直接调用原版右键菜单，完全复用原版 highlight/notes 存储逻辑 */
+  function invokeOriginalMenu(label) {
+    var sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return;
+    var range = sel.getRangeAt(0);
+    var rect = range.getBoundingClientRect();
+    var x = rect.left + rect.width / 2;
+    var y = rect.top + rect.height / 2;
+    /* 触发原版 contextmenu */
+    document.dispatchEvent(new MouseEvent('contextmenu', {
+      bubbles: true, cancelable: true, clientX: x, clientY: y
+    }));
+    /* 等菜单出现，点击对应项 */
+    setTimeout(function () {
+      var items = document.querySelectorAll('.contextMenu-item');
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].textContent.trim() === label) {
+          items[i].click();
+          break;
+        }
+      }
+    }, 50);
   }
 
   var savedRange = null;
