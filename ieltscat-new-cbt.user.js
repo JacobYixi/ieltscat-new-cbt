@@ -2,7 +2,7 @@
 // @name         新东方雅思猫机考 · 新版雅思机考界面
 // @name:en      XDF IELTS Cat Mock → New CBT Interface
 // @namespace    ieltscat.newcbt
-// @version      3.9.8
+// @version      3.9.9
 // @description  把新东方雅思猫机考做题页改造为接近新版雅思机考界面的观感。由于平台 DOM 结构和技术限制，无法做到像素级 100% 复刻，但在配色、排版、布局和交互逻辑上尽量贴近新版机考官方演示界面：白底 Arial、56px 页头（IELTS 品牌 + Test taker ID + 时间 + Show notes）、阅读/写作左右分栏 + 可拖拽分割条、底部 Part 题号导航、选中文字浮条（Note/Highlight/Clear all）、酒红色高亮、Notes 侧栏、倒计时最后 5 分钟红色预警。只作用于机考做题页（/mock/detail/*），练习页完全不受影响。
 // @description:en  Restyles IELTS Cat mock exam pages to resemble the new official IELTS on computer test interface. Due to DOM and technical constraints, pixel-perfect replication is not possible, but colors, layout, and interactions closely follow the official demo. Only affects /mock/detail/*; practice pages are untouched.
 // @author       JacobYixi
@@ -452,7 +452,7 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
       hideAdder();
     });
     adder.querySelector('[data-cbt-clear-all]').addEventListener('click', function () {
-      $$('.cbt-hl, .cbt-note, .highlighted').forEach(function (m) {
+      $$('.cbt-hl, .cbt-note').forEach(function (m) {
         if (m.parentNode) {
           var p = m.parentNode;
           while (m.firstChild) p.insertBefore(m.firstChild, m);
@@ -527,26 +527,7 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
       hideAdder();
       if (document.body.classList.contains('cbt-new')) {
         e.preventDefault();
-        return;
       }
-      /* 监听原版 Clear all，点了之后我们也清自己的 */
-      setTimeout(function () {
-        var items = document.querySelectorAll('.contextMenu-item');
-        for (var i = 0; i < items.length; i++) {
-          if (items[i].textContent.trim() === 'Clear all') {
-            items[i].addEventListener('click', function () {
-              $$('.cbt-hl, .cbt-note').forEach(function (m) {
-                if (m.parentNode) {
-                  var p = m.parentNode;
-                  while (m.firstChild) p.insertBefore(m.firstChild, m);
-                  p.removeChild(m);
-                }
-              });
-              window.__cbtNotes = {};
-            });
-          }
-        }
-      }, 50);
     }, true);
     document.addEventListener('mousedown', function (e) {
       if (!document.body.classList.contains('cbt-new')) return;
@@ -1008,31 +989,9 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
     applyFs();
     startTimerWatch();
     restoreNotes();
-    clearOnSubmit();
   }
 
   /* 交卷时清空所有高亮和笔记（DOM + localStorage） */
-  function clearAllMarks() {
-    function unwrap(m) {
-      while (m.firstChild) m.parentNode.insertBefore(m.firstChild, m);
-      m.parentNode.removeChild(m);
-    }
-    $$('.cbt-hl').forEach(unwrap);
-    $$('.cbt-note').forEach(unwrap);
-    window.__cbtNotes = {};
-  }
-
-  function clearOnSubmit() {
-    var btns = $$('.normal-header__btns-item');
-    btns.forEach(function (b) {
-      if (b.getAttribute('data-cbt-cleared')) return;
-      if (/submit/i.test(b.textContent || '')) {
-        b.setAttribute('data-cbt-cleared', '1');
-        b.addEventListener('click', clearAllMarks, true);
-      }
-    });
-  }
-
   function boot() {
     ensureStyle();
     if (isMock()) transformToggle();
@@ -1040,8 +999,6 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
     var lastUrl = location.href;
     function checkUrl() {
       if (location.href !== lastUrl) {
-        /* 离开做题页（强制收卷跳到结果页）时清空高亮笔记 */
-        if (!isMock()) clearAllMarks();
         lastUrl = location.href;
         clearTimeout(window.__cbtDebounce);
         window.__cbtDebounce = setTimeout(transformAll, 300);
