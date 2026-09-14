@@ -2,7 +2,7 @@
 // @name         新东方雅思猫机考 · 新版雅思机考界面
 // @name:en      XDF IELTS Cat Mock → New CBT Interface
 // @namespace    ieltscat.newcbt
-// @version      3.8.1
+// @version      3.8.2
 // @description  把新东方雅思猫机考做题页改造为接近新版雅思机考界面的观感。由于平台 DOM 结构和技术限制，无法做到像素级 100% 复刻，但在配色、排版、布局和交互逻辑上尽量贴近新版机考官方演示界面：白底 Arial、56px 页头（IELTS 品牌 + Test taker ID + 时间 + Show notes）、阅读/写作左右分栏 + 可拖拽分割条、底部 Part 题号导航、选中文字浮条（Note/Highlight/Clear all）、酒红色高亮、Notes 侧栏、倒计时最后 5 分钟红色预警。只作用于机考做题页（/mock/detail/*），练习页完全不受影响。
 // @description:en  Restyles IELTS Cat mock exam pages to resemble the new official IELTS on computer test interface. Due to DOM and technical constraints, pixel-perfect replication is not possible, but colors, layout, and interactions closely follow the official demo. Only affects /mock/detail/*; practice pages are untouched.
 // @author       JacobYixi
@@ -177,11 +177,11 @@ body.cbt-new .cbt-adder{position:absolute!important;z-index:9990!important;displ
 body.cbt-new .cbt-adder button{display:inline-flex!important;align-items:center!important;gap:6px!important;padding:10px 10px 7px!important;font-size:12px!important;color:#737373!important;background:transparent!important;border:none!important;cursor:pointer!important;font-family:Arial,sans-serif!important;white-space:nowrap!important}
 body.cbt-new .cbt-adder button:hover{background:#f2f2f2!important;color:#000000!important}
 body.cbt-new .cbt-adder svg{width:16px!important;height:16px!important;flex-shrink:0!important}
-body.cbt-new mark.cbt-hl{background:rgb(125,74,90)!important;color:#ffffff!important;padding:0!important;margin:0!important;border-radius:0!important}
+body.cbt-new .cbt-hl{background:rgb(125,74,90)!important;color:#ffffff!important;padding:0!important;margin:0!important;border-radius:0!important}
 body.cbt-new .cbt-hl{background:rgb(125,74,90)!important;color:#ffffff!important}
 /* 蓝色笔记高亮：点击可查看/编辑笔记 */
-body.cbt-new mark.cbt-note{background:#cfe8ff!important;color:#000000!important;border-bottom:2px solid #2196f3!important;padding:0 1px!important;border-radius:2px!important;cursor:pointer!important;display:inline!important}
-body.cbt-new mark.cbt-note:hover{background:#b8dcff!important}
+body.cbt-new .cbt-note{background:#cfe8ff!important;color:#000000!important;border-bottom:2px solid #2196f3!important;padding:0 1px!important;border-radius:2px!important;cursor:pointer!important;display:inline!important}
+body.cbt-new .cbt-note:hover{background:#b8dcff!important}
 body.cbt-new .cbt-note-orig-wrap{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:6px!important;border-bottom:1px solid #e0e0e0!important;padding-bottom:6px!important;margin-bottom:8px!important}
 body.cbt-new .cbt-note-orig-wrap .cbt-note-orig{border-bottom:none!important;padding-bottom:0!important;margin-bottom:0!important}
 body.cbt-new .cbt-note-del{flex:0 0 auto!important;border:none!important;background:none!important;color:#999!important;font-size:16px!important;cursor:pointer!important;padding:0 2px!important;line-height:1!important}
@@ -450,7 +450,7 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
       hideAdder();
     });
     adder.querySelector('[data-cbt-clear-all]').addEventListener('click', function () {
-      $$('mark.cbt-hl').forEach(function (m) {
+      $$('.cbt-hl').forEach(function (m) {
         if (m.parentNode) {
           var p = m.parentNode;
           while (m.firstChild) p.insertBefore(m.firstChild, m);
@@ -635,7 +635,7 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
         var d = getNoteData();
         delete d[id];
         /* 删除蓝色 mark（unwrap） */
-        $$('mark.cbt-note[data-cbt-note-id="' + id + '"]').forEach(function (m) {
+        $$('.cbt-note[data-cbt-note-id="' + id + '"]').forEach(function (m) {
           while (m.firstChild) m.parentNode.insertBefore(m.firstChild, m);
           m.parentNode.removeChild(m);
         });
@@ -702,8 +702,8 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
       var r = document.createRange();
       r.setStart(info.node, info.start);
       r.setEnd(info.node, info.end);
-      var m = document.createElement('mark');
-      m.className = cls;
+      var m = document.createElement('span');
+      m.className = cls + ' highlighted';
       if (noteId) m.setAttribute('data-cbt-note-id', noteId);
       try { r.surroundContents(m); marks.push(m); } catch (e) {}
     });
@@ -729,7 +729,7 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
     Object.keys(data).forEach(function (id) {
       var txt = data[id].text;
       if (!txt) return;
-      if (left.querySelector('mark.cbt-note[data-cbt-note-id="' + id + '"]')) return;
+      if (left.querySelector('.cbt-note[data-cbt-note-id="' + id + '"]')) return;
       var w = document.createTreeWalker(left, NodeFilter.SHOW_TEXT);
       var n;
       while ((n = w.nextNode())) {
@@ -782,7 +782,7 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
   }
   /* 点击蓝色笔记 → 弹层 */
   document.addEventListener('click', function (e) {
-    var mark = e.target && e.target.closest ? e.target.closest('mark.cbt-note') : null;
+    var mark = e.target && e.target.closest ? e.target.closest('.cbt-note') : null;
     if (!mark) return;
     e.preventDefault();
     e.stopPropagation();
@@ -989,8 +989,8 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
       while (m.firstChild) m.parentNode.insertBefore(m.firstChild, m);
       m.parentNode.removeChild(m);
     }
-    $$('mark.cbt-hl').forEach(unwrap);
-    $$('mark.cbt-note').forEach(unwrap);
+    $$('.cbt-hl').forEach(unwrap);
+    $$('.cbt-note').forEach(unwrap);
     window.__cbtNotes = {};
   }
 
