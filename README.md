@@ -21,6 +21,11 @@
 - 右下角开关随时切换新旧界面
 - **只作用于机考做题页，练习页完全不受影响**
 
+## 说明
+
+- 由于技术原因，本脚本的 highlight/note 与原版右键菜单独立运行，互不影响。建议全程使用浮条操作，避免混用。
+- highlight 和 note 均为临时存储，关闭标签页或刷新页面后自动清除。
+
 ## 许可
 
 [Anti-996 License](https://github.com/kattgu7/Anti-996-License)
