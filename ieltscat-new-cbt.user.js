@@ -2,7 +2,7 @@
 // @name         新东方雅思猫机考 · 新版雅思机考界面
 // @name:en      XDF IELTS Cat Mock → New CBT Interface
 // @namespace    ieltscat.newcbt
-// @version      3.9.9
+// @version      3.9.11
 // @description  把新东方雅思猫机考做题页改造为接近新版雅思机考界面的观感。由于平台 DOM 结构和技术限制，无法做到像素级 100% 复刻，但在配色、排版、布局和交互逻辑上尽量贴近新版机考官方演示界面：白底 Arial、56px 页头（IELTS 品牌 + Test taker ID + 时间 + Show notes）、阅读/写作左右分栏 + 可拖拽分割条、底部 Part 题号导航、选中文字浮条（Note/Highlight/Clear all）、酒红色高亮、Notes 侧栏、倒计时最后 5 分钟红色预警。只作用于机考做题页（/mock/detail/*），练习页完全不受影响。
 // @description:en  Restyles IELTS Cat mock exam pages to resemble the new official IELTS on computer test interface. Due to DOM and technical constraints, pixel-perfect replication is not possible, but colors, layout, and interactions closely follow the official demo. Only affects /mock/detail/*; practice pages are untouched.
 // @author       JacobYixi
@@ -119,6 +119,9 @@ body.cbt-new .reading-wrap__section.right::-webkit-scrollbar,body.cbt-new .writi
 body.cbt-new .reading-wrap,body.cbt-new .writing-wrap{scrollbar-width:none!important}
 body.cbt-new .reading-wrap::-webkit-scrollbar,body.cbt-new .writing-wrap::-webkit-scrollbar{display:none!important}
 body.cbt-new .listen-question::-webkit-scrollbar{display:none!important}
+body.cbt-new .exam-bank-wrapper>*{overflow:hidden!important;min-height:0!important}
+body.cbt-new .exam-bank-wrapper>.listen-question{overflow-y:auto!important}
+body.cbt-new .exam-bank-wrapper>.exam-bank-footer{overflow:visible!important;flex-shrink:0!important}
 body.cbt-new .iScrollVerticalScrollbar{width:4px!important}
 body.cbt-new .iScrollVerticalScrollbar > div{width:4px!important;border-radius:0!important;background:#c0c0c0!important}
 body.cbt-new .reading-wrap__section.right p,body.cbt-new .writing-wrap__section.right p{font-size:var(--cbt-fs)!important;line-height:1.6!important;color:#000000!important;font-family:Arial,sans-serif!important}
@@ -500,7 +503,7 @@ body.cbt-new .cbt-notes-empty{position:absolute!important;top:70px!important;lef
     function isInContent(el) {
       if (!el) return false;
       if (el.nodeType === 3) el = el.parentElement;
-      return el && (el.closest('.cbt-col-left') || el.closest('.cbt-col-right'));
+      return el && (el.closest('.cbt-col-left') || el.closest('.cbt-col-right') || el.closest('.listen-question'));
     }
     function showAdderForSelection() {
       var sel = window.getSelection();
